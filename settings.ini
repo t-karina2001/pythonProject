@@ -1,0 +1,2 @@
+[GAME]
+MY_MONEY = 1000
