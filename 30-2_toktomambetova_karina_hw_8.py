@@ -1,5 +1,3 @@
-# 1. Создать таблицу countries (страны) c колонками id первичный ключ автоинкрементируемый и
-# колонка title с текстовым не пустым названием страны.
 import sqlite3
 
 
@@ -85,6 +83,8 @@ def select_employees(conn, city_id):
 database_name = 'homework.db'
 connection = create_connection(database_name)
 
+# 1. Создать таблицу countries (страны)
+# c колонками id первичный ключ автоинкрементируемый и колонка title с текстовым не пустым названием страны.
 create_countries_table_sql = '''
 CREATE TABLE countries (
 id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -92,6 +92,10 @@ title VARCHAR(200) NOT NULL
 )
 '''
 
+# 3. Добавить таблицу cities (города) c колонками id первичный ключ автоинкрементируемый,
+# колонка title с текстовым не пустым названием города и колонка area площадь города не
+# целочисленного типа данных со значением по умолчанием 0,
+# а также колонка country_id с внешним ключом на таблицу countries.
 create_cities_table_sql = '''
 CREATE TABLE IF NOT EXISTS cities (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,6 +105,10 @@ country_id INTEGER,
 FOREIGN KEY (country_id) REFERENCES countries (id)
 )'''
 
+# 5. Создать таблицу employees (сотрудники) c колонками id первичный ключ автоинкрементируемый,
+# колонка first_name (имя) с текстовым не пустым значением,
+# колонка last_name (фамилия) с текстовым не пустым значением,
+# а также колонка city_id с внешним ключом на таблицу cities.
 create_employees_table_sql = '''
 CREATE TABLE IF NOT EXISTS employees (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,10 +124,12 @@ if connection is not None:
     create_table(connection, create_cities_table_sql)
     create_table(connection, create_employees_table_sql)
 
+    # 2. Добавить 3 записи в таблицу countries
     insert_countries(connection, ('Кыргызстан'))
     insert_countries(connection, ('Америка'))
     insert_countries(connection, ('Корея'))
 
+    # 4. Добавить 7 городов различных стран
     insert_cities(connection, 'Бишкек', 156.45, 1)
     insert_cities(connection, 'Каракол', 452.56, 1)
     insert_cities(connection, 'Балыкчы', 930.95, 1)
@@ -128,6 +138,7 @@ if connection is not None:
     insert_cities(connection, 'Вашингтон', 987.65, 2)
     insert_cities(connection, 'Пусан', 984, 3)
 
+    # 6. Добавить 15 сотрудников проживающих в разных городах.
     insert_employees(connection, 'Алмаш', 'Абдраимова', 1)
     insert_employees(connection, 'Акылай', 'Мурзаканова', 2)
     insert_employees(connection, 'Айдар', 'Орозакунов', 3)
@@ -144,7 +155,15 @@ if connection is not None:
     insert_employees(connection, 'Азалия', 'Эрикова', 2)
     insert_employees(connection, 'Динара', 'Айтахунова', 3)
 
+    connection.close()
 
+
+# 8. Ниже фразы программа должна распечатывать список городов из вашей базы данных следующим образом
+# Бишкек
+# Ош
+# Берлин
+# Пекин
+# и тд…
 def cities_list(conn):
     cities = select_cities(conn)
     print('Список городов: ')
@@ -152,21 +171,37 @@ def cities_list(conn):
         print(city[0])
 
 
+# 9. После ввода определенного id города программа должна найти
+# всех сотрудников из вашей базы данных проживающих в городе выбранного пользователем и отобразить информацию
+# о них в консоли (Имя, фамилия, страна и город проживания)
 def search_employees(conn, city_id):
     employees = select_employees(conn, city_id)
     print('Список сотрудников, проживающих в данном городе: ')
     for employee in employees:
         print(f'Имя: {employee[0]}, Фамилия: {employee[1]}, Страна: {employee[2]}, Город проживания: {employee[3]}')
 
-        if connection is not None:
-            print('Вы можете отобразить список сотрудников по выбранному id города'
-                  ' из перечня городов ниже, для выхода из программы введите 0:')
-            cities_list(connection)
+        # 7. Написать программу в Python, которая при запуске бы отображала фразу
+        # “Вы можете отобразить список сотрудников по выбранному id города из перечня городов ниже,
+        # для выхода из программы введите 0:”
 
-            while True:
-                city_id = int(input('Введите id города: '))
-                if city_id == 0:
-                    break
-                select_employees(connection, city_id)
 
-connection.close()
+def run_program():
+    database_name = 'homework.db'
+    connection = create_connection(database_name)
+
+    if connection is not None:
+        print('Вы можете отобразить список сотрудников по выбранному id города'
+              ' из перечня городов ниже, для выхода из программы введите 0:')
+        cities_list(connection)
+
+        while True:
+            city_id = int(input('Введите id города: '))
+            if city_id == 0:
+                break
+
+        select_employees(connection, city_id)
+
+    connection.close()
+
+
+run_program()
